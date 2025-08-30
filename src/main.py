@@ -7,6 +7,8 @@ from fastapi.responses import ORJSONResponse
 
 from src.utils import db_helper
 
+from api_v1 import router as api_v1_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -15,6 +17,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="Bookly", default_response_class=ORJSONResponse, lifespan=lifespan)
+
+app.include_router(api_v1_router)
 
 
 if __name__ == "__main__":
