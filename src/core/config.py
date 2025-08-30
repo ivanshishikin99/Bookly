@@ -23,7 +23,7 @@ class DbConfig(BaseModel):
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env",
-                                      env_prefix="BOOKLY_CONFIG__",
+                                      env_prefix="APP_CONFIG__",
                                       env_nested_delimiter="__",
                                       case_sensitive=False)
     db: DbConfig
