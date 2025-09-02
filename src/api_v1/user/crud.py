@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.user.schemas import UserCreate
-from src.core.models import User
+from src.core.models import User, Profile
 from src.utils import hash_password
 
 
@@ -12,6 +12,9 @@ async def create_user(user_data: UserCreate, session: AsyncSession) -> User | Va
     session.add(user)
     await session.commit()
     await session.refresh(user)
+    profile = Profile(user_id=user.id, is_public=True)
+    session.add(profile)
+    await session.commit()
     return user
 
 
