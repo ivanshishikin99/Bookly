@@ -27,6 +27,14 @@ class MailConfig(BaseModel):
     hostname: str = "localhost"
 
 
+class JwtConfig(BaseModel):
+    algorithm: str = "RS256"
+    access_token_expire_minutes: int = 5
+    refresh_token_expire_minutes: int = 42600
+    public_key_path: Path = BASE_DIR / "certs" / "public_key.pem"
+    private_key_path: Path = BASE_DIR / "certs" / "private_key.pem"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env",
                                       env_prefix="APP_CONFIG__",
