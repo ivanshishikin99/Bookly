@@ -21,12 +21,19 @@ class DbConfig(BaseModel):
     }
 
 
+class MailConfig(BaseModel):
+    admin_email: str = "bookly@gmail.com"
+    port: int = 1025
+    hostname: str = "localhost"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env",
                                       env_prefix="APP_CONFIG__",
                                       env_nested_delimiter="__",
                                       case_sensitive=False)
     db: DbConfig
+    mail_config: MailConfig = MailConfig()
 
 
 settings = Settings()
