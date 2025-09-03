@@ -3,8 +3,11 @@ __all__ = ("camel_case_to_snake_case",
            "hash_password",
            "verify_password",
            "validate_password",
+           "encode_jwt",
+           "decode_jwt",
            )
 
 from .case_converter import camel_case_to_snake_case
 from .db_helper import db_helper
 from .password_helpers import hash_password, verify_password, validate_password
+from .token_helpers import encode_jwt, decode_jwt
