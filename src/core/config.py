@@ -42,6 +42,7 @@ class Settings(BaseSettings):
                                       case_sensitive=False)
     db: DbConfig
     mail_config: MailConfig = MailConfig()
+    jwt_config: JwtConfig = JwtConfig()
 
 
 settings = Settings()
