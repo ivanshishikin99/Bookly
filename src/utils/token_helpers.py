@@ -13,7 +13,7 @@ def encode_jwt(payload: dict,
     now = datetime.now(tz=timezone.utc)
     exp = now + timedelta(minutes=expire_minutes)
     to_encode.update(iat=now, exp=exp)
-    return jwt.encode(payload=payload, key=private_key, algorithm=algorithm)
+    return jwt.encode(payload=to_encode, key=private_key, algorithm=algorithm)
 
 
 def decode_jwt(token: str | bytes,
