@@ -42,3 +42,9 @@ async def get_user_by_id(user_id: int, session: AsyncSession) -> User | HTTPExce
     return user
 
 
+async def delete_user(user: User, session: AsyncSession):
+    await session.delete(user)
+    await session.commit()
+    return {"Your account has been deleted successfully."}
+
+
