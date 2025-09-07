@@ -46,3 +46,18 @@ class UserRead(BaseModel):
     verified: bool
     role_access: str
 
+
+class SuperUserCreate(BaseModel):
+    username: str
+    password: str
+    email: EmailStr
+    verified: bool = True
+    role_access: str = "Super user"
+
+
+class SuperUserRead(BaseModel):
+    username: str
+    email: EmailStr
+    verified: bool
+    role_access: str = "Super user"
+
