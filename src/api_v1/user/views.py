@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status, Depends, HTTPException, Response
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.user.crud import create_user, login_user, delete_user
@@ -36,6 +37,7 @@ async def login_user_view(response: Response,
 
 
 @router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
+@cache(expire=60)
 async def get_user_by_id_view(user: User = Depends(get_user_by_id_dependency)) -> User | HTTPException:
     return user
 
