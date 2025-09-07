@@ -35,6 +35,12 @@ class JwtConfig(BaseModel):
     private_key_path: Path = BASE_DIR / "certs" / "private_key.pem"
 
 
+class RedisConfig(BaseModel):
+    prefix: str = "cache"
+    hostname: str = "localhost"
+    port: int = 6379
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env",
                                       env_prefix="APP_CONFIG__",
@@ -43,6 +49,7 @@ class Settings(BaseSettings):
     db: DbConfig
     mail_config: MailConfig = MailConfig()
     jwt_config: JwtConfig = JwtConfig()
+    redis_config: RedisConfig = RedisConfig()
 
 
 settings = Settings()
