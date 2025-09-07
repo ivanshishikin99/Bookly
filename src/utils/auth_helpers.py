@@ -2,10 +2,11 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
-from src.core.models import User
+from src.core.models import User, Profile
 from src.utils import encode_jwt, decode_jwt, db_helper
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api_v1/users/login")
@@ -62,3 +63,17 @@ async def get_user_by_token(payload: dict = Depends(get_current_token_payload),
     if not (user := await session.get(User, user_id)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token data.")
     return user
+
+
+async def get_profile_by_token(payload: dict = Depends(get_current_token_payload),
+                               session: AsyncSession = Depends(db_helper.session_getter)) -> Profile | HTTPException:
+    token_type = payload.get("type")
+    if not token_type == "access_token":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type.")
+    user_id = payload.get("id")
+    if not (user := await session.get(User, user_id)):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token data.")
+    statement = select(Profile).where(Profile.user_id == user.id)
+    profile = await session.execute(statement)
+    profile = profile.scalar_one()
+    return profile
