@@ -3,8 +3,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.user.schemas import UserCreate, SuperUserCreate
-from src.core.models import User, Profile
+from src.core.models import User, Profile, EmailVerificationToken
 from src.utils import hash_password, verify_password
+from src.utils.auth_helpers import generate_email_verification_code
+from src.tasks.tasks import send_verification_email
 
 
 async def create_user(user_data: UserCreate, session: AsyncSession) -> User | ValueError:
@@ -58,5 +60,16 @@ async def delete_user(user: User, session: AsyncSession):
     await session.delete(user)
     await session.commit()
     return {"Your account has been deleted successfully."}
+
+
+async def send_verification_email_crud(user: User, session: AsyncSession):
+    if user.verified:
+        return {"Your email has already been verified."}
+    code = generate_email_verification_code()
+    token = EmailVerificationToken(token=code, user_email=user.email)
+    session.add(token)
+    await session.commit()
+    send_verification_email.delay(user_id=user.id, user_email=user.email, verification_token=code)
+    return {"A token has been sent, please check your e-mail."}
 
 
