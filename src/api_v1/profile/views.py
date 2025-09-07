@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status, Depends
+from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.profile.crud import update_profile_partial, update_profile_full
@@ -11,6 +12,7 @@ router = APIRouter(prefix="/profiles", tags=["Profiles"])
 
 
 @router.get("/me", response_model=ProfileRead, status_code=status.HTTP_200_OK)
+@cache(expire=60)
 async def get_your_profile_view(profile: Profile = Depends(get_profile_by_token)) -> Profile:
     return profile
 
