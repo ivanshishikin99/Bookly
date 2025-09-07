@@ -3,13 +3,13 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.user.crud import create_user, login_user, delete_user
+from src.api_v1.user.crud import create_user, login_user, delete_user, create_super_user
 from src.api_v1.user.dependencies import get_user_by_id_dependency
-from src.api_v1.user.schemas import UserRead, UserCreate
+from src.api_v1.user.schemas import UserRead, UserCreate, SuperUserRead, SuperUserCreate
 from src.core.models import User
 from src.tasks import send_welcome_email
-from src.utils import db_helper, create_access_token, create_refresh_token
-from src.utils.auth_helpers import get_user_by_token, TokenModel
+from src.utils import db_helper
+from src.utils.auth_helpers import get_user_by_token, TokenModel, create_access_token, create_refresh_token
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -21,6 +21,13 @@ async def register_user_view(user_data: UserCreate,
                              session: AsyncSession = Depends(db_helper.session_getter)) -> User | ValueError:
     user = await create_user(user_data=user_data, session=session)
     send_welcome_email.delay(username=user_data.username, email=user_data.email, user_id=user.id)
+    return user
+
+
+@router.post("/register_super_user", response_model=SuperUserRead, status_code=status.HTTP_201_CREATED)
+async def register_super_user_view(user_data: SuperUserCreate,
+                                   session: AsyncSession = Depends(db_helper.session_getter)) -> User | ValueError:
+    user = await create_super_user(user_data=user_data, session=session)
     return user
 
 
