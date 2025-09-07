@@ -3,13 +3,15 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.user.crud import create_user, login_user, delete_user, create_super_user
+from src.api_v1.user.crud import create_user, login_user, delete_user, create_super_user, send_verification_email, \
+    send_verification_email_crud
 from src.api_v1.user.dependencies import get_user_by_id_dependency
 from src.api_v1.user.schemas import UserRead, UserCreate, SuperUserRead, SuperUserCreate
-from src.core.models import User
+from src.core.models import User, EmailVerificationToken
 from src.tasks import send_welcome_email
 from src.utils import db_helper
-from src.utils.auth_helpers import get_user_by_token, TokenModel, create_access_token, create_refresh_token
+from src.utils.auth_helpers import get_user_by_token, TokenModel, create_access_token, create_refresh_token, \
+    generate_email_verification_code
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -42,6 +44,12 @@ async def login_user_view(response: Response,
     response.set_cookie("access_token", access_token, httponly=True)
     response.set_cookie("refresh_token", refresh_token, httponly=True)
     return TokenModel(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.get("/send_verification_email", status_code=status.HTTP_200_OK)
+async def send_verification_email_view(user: User = Depends(get_user_by_token),
+                                       session: AsyncSession = Depends(db_helper.session_getter)):
+    return await send_verification_email_crud(user=user, session=session)
 
 
 @router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
