@@ -41,6 +41,19 @@ class RedisConfig(BaseModel):
     port: int = 6379
 
 
+class CeleryConfig(BaseModel):
+    backend: str = "redis"
+    hostname: str = "localhost"
+    username: str = "guest"
+    password: str = "guest"
+    port: int = 6379
+    include_path: str = "tasks.tasks"
+    result_backend: str = "redis://localhost:6379/0"
+    visibility_timeout: int = 3600
+    task_serializer: str = "json"
+    timezone: str = "Europe/Moscow"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env",
                                       env_prefix="APP_CONFIG__",
@@ -50,6 +63,7 @@ class Settings(BaseSettings):
     mail_config: MailConfig = MailConfig()
     jwt_config: JwtConfig = JwtConfig()
     redis_config: RedisConfig = RedisConfig()
+    celery_config: CeleryConfig = CeleryConfig()
 
 
 settings = Settings()
