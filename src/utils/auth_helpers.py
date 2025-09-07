@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
@@ -6,8 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
-from src.core.models import User, Profile
 from src.utils import encode_jwt, decode_jwt, db_helper
+from src.core.models import User, Profile
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api_v1/users/login")
 
