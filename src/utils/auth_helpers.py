@@ -1,4 +1,6 @@
+import uuid
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
@@ -79,3 +81,7 @@ async def get_profile_by_token(payload: dict = Depends(get_current_token_payload
     profile = await session.execute(statement)
     profile = profile.scalar_one()
     return profile
+
+
+def generate_email_verification_code() -> UUID:
+    return uuid.uuid4()
