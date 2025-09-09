@@ -124,4 +124,15 @@ async def reset_password_crud(reset_token: UUID,
     return {"Your password has been changed."}
 
 
+async def change_password(old_password: str,
+                          new_password: str,
+                          user: User,
+                          session: AsyncSession):
+    if not verify_password(password=old_password, hashed_password=user.password):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong password.")
+    user.password = hash_password(password=new_password)
+    await session.commit()
+    return {"Your password has been changed."}
+
+
 
