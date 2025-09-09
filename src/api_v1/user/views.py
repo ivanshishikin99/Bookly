@@ -7,7 +7,7 @@ from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.user.crud import create_user, login_user, delete_user, create_super_user, send_verification_email, \
-    send_verification_email_crud, verify_email_crud, send_reset_password_crud, reset_password_crud
+    send_verification_email_crud, verify_email_crud, send_reset_password_crud, reset_password_crud, change_password
 from src.api_v1.user.dependencies import get_user_by_id_dependency
 from src.api_v1.user.schemas import UserRead, UserCreate, SuperUserRead, SuperUserCreate
 from src.core.models import User, EmailVerificationToken
@@ -75,6 +75,17 @@ async def reset_password_view(reset_token: UUID,
     return await reset_password_crud(reset_token=reset_token,
                                      new_password=new_password.get_secret_value(),
                                      session=session)
+
+
+@router.post("/change_password", status_code=status.HTTP_200_OK)
+async def change_password_view(old_password: SecretStr,
+                               new_password: SecretStr,
+                               user: User = Depends(get_user_by_token),
+                               session: AsyncSession = Depends(db_helper.session_getter)):
+    return await change_password(old_password=old_password.get_secret_value(),
+                                 new_password=new_password.get_secret_value(),
+                                 user=user,
+                                 session=session)
 
 
 @router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
