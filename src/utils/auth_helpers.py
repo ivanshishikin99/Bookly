@@ -85,3 +85,7 @@ async def get_profile_by_token(payload: dict = Depends(get_current_token_payload
 
 def generate_email_verification_code() -> UUID:
     return uuid.uuid4()
+
+
+def generate_password_reset_token() -> UUID:
+    return uuid.uuid4()
