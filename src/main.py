@@ -14,6 +14,7 @@ from src.core.config import settings
 from src.utils import db_helper
 
 from api_v1 import router as api_v1_router
+from src.utils.clean_reset_token import clean_password_reset_tokens_table
 from src.utils.clean_verification_token import clean_email_verification_tokens_table
 
 
@@ -24,6 +25,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     )
     FastAPICache.init(RedisBackend(redis), prefix=settings.redis_config.prefix)
     asyncio.create_task(clean_email_verification_tokens_table())
+    asyncio.create_task(clean_password_reset_tokens_table())
     yield
     await db_helper.dispose()
 
