@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
@@ -13,6 +14,7 @@ from src.core.config import settings
 from src.utils import db_helper
 
 from api_v1 import router as api_v1_router
+from src.utils.clean_verification_token import clean_email_verification_tokens_table
 
 
 @asynccontextmanager
@@ -21,6 +23,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         f"redis://{settings.redis_config.hostname}:{settings.redis_config.port}"
     )
     FastAPICache.init(RedisBackend(redis), prefix=settings.redis_config.prefix)
+    asyncio.create_task(clean_email_verification_tokens_table())
     yield
     await db_helper.dispose()
 
