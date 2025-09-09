@@ -1,10 +1,12 @@
+from uuid import UUID
+
 from fastapi import APIRouter, status, Depends, HTTPException, Response
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.user.crud import create_user, login_user, delete_user, create_super_user, send_verification_email, \
-    send_verification_email_crud
+    send_verification_email_crud, verify_email_crud
 from src.api_v1.user.dependencies import get_user_by_id_dependency
 from src.api_v1.user.schemas import UserRead, UserCreate, SuperUserRead, SuperUserCreate
 from src.core.models import User, EmailVerificationToken
@@ -50,6 +52,13 @@ async def login_user_view(response: Response,
 async def send_verification_email_view(user: User = Depends(get_user_by_token),
                                        session: AsyncSession = Depends(db_helper.session_getter)):
     return await send_verification_email_crud(user=user, session=session)
+
+
+@router.post("/verify_email", status_code=status.HTTP_200_OK)
+async def verify_email_view(token: UUID,
+                            user: User = Depends(get_user_by_token),
+                            session: AsyncSession = Depends(db_helper.session_getter)):
+    return await verify_email_crud(token=token, user=user, session=session)
 
 
 @router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
