@@ -6,10 +6,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.user.schemas import UserCreate, SuperUserCreate
-from src.core.models import User, Profile, EmailVerificationToken
+from src.core.models import User, Profile, EmailVerificationToken, PasswordResetToken
 from src.utils import hash_password, verify_password
-from src.utils.auth_helpers import generate_email_verification_code
-from src.tasks.tasks import send_verification_email
+from src.utils.auth_helpers import generate_email_verification_code, generate_password_reset_token
+from src.tasks.tasks import send_verification_email, send_password_reset_token_email
 
 
 async def create_user(user_data: UserCreate, session: AsyncSession) -> User | ValueError:
@@ -86,5 +86,42 @@ async def verify_email_crud(token: UUID, user: User, session: AsyncSession):
         await session.commit()
         return {"Your email has been verified successfully."}
     return {"Wrong token."}
+
+
+async def send_reset_password_crud(user_email: str,
+                                   session: AsyncSession):
+    statement = select(User).where(User.email == user_email)
+    user = await session.execute(statement)
+    user = user.scalar_one()
+    if user:
+        reset_token = generate_password_reset_token()
+        send_password_reset_token_email.delay(user_email=user_email, reset_token=reset_token)
+        token = PasswordResetToken(user_email=user_email,
+                                   token=reset_token)
+        session.add(token)
+        await session.commit()
+        await session.refresh(token)
+        return "Password reset token has been sent to your e-mail."
+    return "Wrong e-mail."
+
+
+async def reset_password_crud(reset_token: UUID,
+                              new_password: str,
+                              session: AsyncSession):
+    try:
+        statement = select(PasswordResetToken).where(PasswordResetToken.token == reset_token)
+        token = await session.execute(statement)
+        token = token.scalar_one()
+        user_statement = select(User).where(User.email == token.user_email)
+        user = await session.execute(user_statement)
+        user = user.scalar_one()
+    except:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Wrong token")
+    if datetime.now() - timedelta(hours=3) - token.created_at > timedelta(hours=1):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Your token has expired.")
+    user.password = hash_password(password=new_password)
+    await session.commit()
+    return {"Your password has been changed."}
+
 
 
