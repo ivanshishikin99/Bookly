@@ -1,3 +1,6 @@
+from datetime import timedelta, datetime, timezone
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -71,5 +74,17 @@ async def send_verification_email_crud(user: User, session: AsyncSession):
     await session.commit()
     send_verification_email.delay(user_id=user.id, user_email=user.email, verification_token=code)
     return {"A token has been sent, please check your e-mail."}
+
+
+async def verify_email_crud(token: UUID, user: User, session: AsyncSession):
+    statement = select(EmailVerificationToken).where(EmailVerificationToken.user_email == user.email)
+    token_db = await session.execute(statement)
+    token_db = token_db.scalar_one()
+    if token_db.token == token and datetime.now() - timedelta(hours=3) - token_db.created_at < timedelta(hours=1):
+        user.verified = True
+        user.role_access = "Verified user"
+        await session.commit()
+        return {"Your email has been verified successfully."}
+    return {"Wrong token."}
 
 
