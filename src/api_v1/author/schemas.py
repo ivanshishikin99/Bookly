@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class AuthorCreate(BaseModel):
     full_name: str
+    country: str
     date_of_birth: date
     date_of_death: date | None
     bio: str
@@ -20,6 +21,7 @@ class AuthorUpdateFull(AuthorCreate):
 
 class AuthorUpdatePartial(BaseModel):
     full_name: str | None
+    country: str | None
     date_of_birth: date | None
     date_of_death: date | None
     bio: str | None
