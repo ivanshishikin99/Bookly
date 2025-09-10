@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 class Author(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
     full_name: Mapped[str] = mapped_column(nullable=False)
+    country: Mapped[str] = mapped_column(nullable=False)
     date_of_birth: Mapped[date] = mapped_column(nullable=False)
     date_of_death: Mapped[date] = mapped_column(nullable=True)
     bio: Mapped[str] = mapped_column(nullable=True)
