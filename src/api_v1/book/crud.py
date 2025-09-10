@@ -1,10 +1,12 @@
 from fastapi import HTTPException, status
+from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.book.schemas import BookCreate, BookUpdatePartial, BookUpdateFull
 from src.core.models import Book, User
 
 
+@cache(expire=60)
 async def get_book_by_id(book_id: int,
                          session: AsyncSession) -> Book | None:
     book = await session.get(Book, book_id)
