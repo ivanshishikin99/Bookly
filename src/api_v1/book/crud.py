@@ -40,7 +40,7 @@ async def update_book_full(book_data: BookUpdateFull,
                            book: Book,
                            session: AsyncSession) -> Book | HTTPException:
     if not user.role_access == "Super user":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only super userы are allowed to modify books.")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only super users are allowed to modify books.")
     for k, v in book_data.model_dump().items():
         setattr(book, k, v)
     await session.commit()
