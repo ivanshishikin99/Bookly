@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.book.crud import create_book, update_book_partial, update_book_full, delete_book
@@ -11,6 +12,7 @@ from src.utils.auth_helpers import get_user_by_token
 router = APIRouter(prefix="/book", tags=["Books"])
 
 
+@cache(expire=60)
 @router.get("/{book_id}", response_model=BookRead, status_code=status.HTTP_404_NOT_FOUND)
 async def get_book_by_id_view(book: Book = Depends(get_book_by_id_dependency)) -> Book | HTTPException:
     return book
