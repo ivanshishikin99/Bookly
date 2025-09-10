@@ -1,9 +1,9 @@
 from fastapi import APIRouter, status, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.book.crud import create_book
+from src.api_v1.book.crud import create_book, update_book_partial, update_book_full, delete_book
 from src.api_v1.book.dependencies import get_book_by_id_dependency
-from src.api_v1.book.schemas import BookRead, BookCreate
+from src.api_v1.book.schemas import BookRead, BookCreate, BookUpdatePartial, BookUpdateFull
 from src.core.models import Book, User
 from src.utils import db_helper
 from src.utils.auth_helpers import get_user_by_token
@@ -22,4 +22,35 @@ async def create_book_view(book_data: BookCreate,
                            session: AsyncSession = Depends(db_helper.session_getter)) -> Book | HTTPException:
     return await create_book(book_data=book_data,
                              user=user,
+                             session=session)
+
+
+@router.patch("/{book_id}", response_model=BookRead, status_code=status.HTTP_200_OK)
+async def update_book_partial_view(book_data: BookUpdatePartial,
+                                   user: User = Depends(get_user_by_token),
+                                   book: Book = Depends(get_book_by_id_dependency),
+                                   session: AsyncSession = Depends(db_helper.session_getter)) -> Book | HTTPException:
+    return await update_book_partial(book_data=book_data,
+                                     user=user,
+                                     book=book,
+                                     session=session)
+
+
+@router.put("/{book_id}", response_model=BookRead, status_code=status.HTTP_200_OK)
+async def update_book_full_view(book_data: BookUpdateFull,
+                                user: User = Depends(get_user_by_token),
+                                book: Book = Depends(get_book_by_id_dependency),
+                                session: AsyncSession = Depends(db_helper.session_getter)) -> Book | HTTPException:
+    return await update_book_full(book_data=book_data,
+                                  user=user,
+                                  book=book,
+                                  session=session)
+
+
+@router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_book_view(user: User = Depends(get_user_by_token),
+                           book: Book = Depends(get_book_by_id_dependency),
+                           session: AsyncSession = Depends(db_helper.session_getter)):
+    return await delete_book(user=user,
+                             book=book,
                              session=session)
