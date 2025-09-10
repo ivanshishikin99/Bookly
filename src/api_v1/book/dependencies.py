@@ -7,7 +7,7 @@ from src.utils import db_helper
 
 
 async def get_book_by_id_dependency(book_id: int,
-                                    session: AsyncSession = Depends(db_helper)) -> Book | HTTPException:
+                                    session: AsyncSession = Depends(db_helper.session_getter)) -> Book | HTTPException:
     try:
         book = await get_book_by_id(book_id=book_id,
                                     session=session)
