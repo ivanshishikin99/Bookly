@@ -4,6 +4,7 @@ __all__ = ("Base",
            "Book",
            "EmailVerificationToken",
            "PasswordResetToken",
+           "Author",
            )
 
 from .base import Base
@@ -12,3 +13,4 @@ from .profile import Profile
 from .book import Book
 from .email_verification_token import EmailVerificationToken
 from .password_reset_token import PasswordResetToken
+from .author import Author
