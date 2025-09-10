@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
@@ -17,7 +17,7 @@ class Profile(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
     country: Mapped[str] = mapped_column(nullable=True)
     bio: Mapped[str] = mapped_column(nullable=True)
     sex: Mapped[str] = mapped_column(nullable=True)
-    date_of_birth: Mapped[datetime] = mapped_column(nullable=True)
+    date_of_birth: Mapped[date] = mapped_column(nullable=True)
     is_public: Mapped[bool] = mapped_column(nullable=False, default=True)
     user: Mapped["User"] = relationship(back_populates="profile")
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), unique=True)
