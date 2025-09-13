@@ -4,18 +4,21 @@ from pydantic import BaseModel
 class BookCreate(BaseModel):
     title: str
     year_of_release: int
-    author: str
+    author_id: int
     description: str
 
 
-class BookRead(BookCreate):
-    pass
+class BookRead(BaseModel):
+    title: str
+    year_of_release: int
+    author: str
+    description: str
 
 
 class BookUpdatePartial(BaseModel):
     title: str | None
     year_of_release: int | None
-    author: str | None
+    author_id: int
     description: str | None
 
 
