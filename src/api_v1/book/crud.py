@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.book.schemas import BookCreate, BookUpdatePartial, BookUpdateFull
+from src.api_v1.book.schemas import BookCreate, BookUpdatePartial, BookUpdateFull, BookRead
 from src.core.models import Book, User, Author
 
 
@@ -59,8 +59,14 @@ async def delete_book(user: User,
 
 
 async def get_books_by_author(author: Author,
-                                  session: AsyncSession):
+                              session: AsyncSession) -> list[BookRead]:
     statement = select(Book).where(Book.author == author)
     books = await session.execute(statement)
     books = books.scalars()
-    return books
+    books_read = list()
+    for book in books:
+        books_read.append(BookRead(title=book.title,
+                                   year_of_release=book.year_of_release,
+                                   author=book.author.full_name,
+                                   description=book.description))
+    return books_read
