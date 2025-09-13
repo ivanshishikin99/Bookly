@@ -4,10 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.author.crud import get_author_by_id
 from src.api_v1.author.dependencies import get_author_by_id_dependency
-from src.api_v1.book.crud import create_book, update_book_partial, update_book_full, delete_book, get_books_by_author
-from src.api_v1.book.dependencies import get_book_by_id_dependency
+from src.api_v1.book.crud import create_book, update_book_partial, update_book_full, delete_book, get_books_by_author, \
+    get_book_reviews
+from src.api_v1.book.dependencies import get_book_by_id_dependency, get_book_schema_by_id_dependency
 from src.api_v1.book.schemas import BookRead, BookCreate, BookUpdatePartial, BookUpdateFull
-from src.core.models import Book, User, Author
+from src.api_v1.review.schemas import ReviewRead
+from src.core.models import Book, User, Author, Review
 from src.utils import db_helper
 from src.utils.auth_helpers import get_user_by_token
 
@@ -16,7 +18,7 @@ router = APIRouter(prefix="/book", tags=["Books"])
 
 @cache(expire=60)
 @router.get("/{book_id}", response_model=BookRead, status_code=status.HTTP_404_NOT_FOUND)
-async def get_book_by_id_view(book: Book = Depends(get_book_by_id_dependency)) -> BookRead | HTTPException:
+async def get_book_by_id_view(book: Book = Depends(get_book_schema_by_id_dependency)) -> BookRead | HTTPException:
     return book
 
 
@@ -66,3 +68,11 @@ async def get_books_by_author_view(author: Author = Depends(get_author_by_id_dep
                                    session: AsyncSession = Depends(db_helper.session_getter)) -> list[BookRead]:
     return await get_books_by_author(author=author,
                                      session=session)
+
+
+@cache(expire=60)
+@router.get("/{book_id}/reviews", status_code=status.HTTP_200_OK, response_model=list[ReviewRead])
+async def get_book_reviews_view(book: Book = Depends(get_book_by_id_dependency),
+                                session: AsyncSession = Depends(db_helper.session_getter)) -> list[Review] | None:
+    return await get_book_reviews(book=book,
+                                  session=session)
