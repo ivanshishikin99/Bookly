@@ -9,8 +9,11 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 from redis import asyncio as aioredis
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from src.core.config import settings
+from src.middleware.register_middleware import register_middleware
 from src.utils import db_helper
 
 from api_v1 import router as api_v1_router
@@ -31,6 +34,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="Bookly", default_response_class=ORJSONResponse, lifespan=lifespan)
+
+limiter = Limiter(key_func=get_remote_address, default_limits=["20/minute"])
+
+app.state.limiter = limiter
+
+register_middleware(app=app)
 
 app.include_router(api_v1_router)
 
