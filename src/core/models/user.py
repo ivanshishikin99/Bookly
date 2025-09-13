@@ -7,6 +7,7 @@ from src.core.models.mixins import IdMixin, CreatedAtMixin, UpdatedAtMixin
 
 if TYPE_CHECKING:
     from src.core.models.profile import Profile
+    from src.core.models.review import Review
 
 
 class User(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
@@ -16,3 +17,4 @@ class User(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
     role_access: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(nullable=False, unique=True)
     profile: Mapped["Profile"] = relationship(back_populates="user", cascade="all, delete")
+    reviews: Mapped[list["Review"]] = relationship(back_populates="user", cascade="all, delete", lazy="selectin")
