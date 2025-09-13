@@ -2,10 +2,12 @@ from fastapi import APIRouter, status, Depends, HTTPException
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api_v1.book.crud import create_book, update_book_partial, update_book_full, delete_book
+from src.api_v1.author.crud import get_author_by_id
+from src.api_v1.author.dependencies import get_author_by_id_dependency
+from src.api_v1.book.crud import create_book, update_book_partial, update_book_full, delete_book, get_books_by_author
 from src.api_v1.book.dependencies import get_book_by_id_dependency
 from src.api_v1.book.schemas import BookRead, BookCreate, BookUpdatePartial, BookUpdateFull
-from src.core.models import Book, User
+from src.core.models import Book, User, Author
 from src.utils import db_helper
 from src.utils.auth_helpers import get_user_by_token
 
@@ -56,3 +58,11 @@ async def delete_book_view(user: User = Depends(get_user_by_token),
     return await delete_book(user=user,
                              book=book,
                              session=session)
+
+
+@cache(expire=60)
+@router.get("/{author_id}/books", status_code=status.HTTP_200_OK, response_model=list[BookRead])
+async def get_books_by_author_view(author: Author = Depends(get_author_by_id_dependency),
+                                   session: AsyncSession = Depends(db_helper.session_getter)) -> list[Book]:
+    return await get_books_by_author(author=author,
+                                     session=session)
