@@ -17,4 +17,4 @@ class Author(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
     date_of_birth: Mapped[date] = mapped_column(nullable=False)
     date_of_death: Mapped[date] = mapped_column(nullable=True)
     bio: Mapped[str] = mapped_column(nullable=True)
-    books: Mapped[list["Book"]] = relationship(back_populates="author", cascade="all, delete")
+    books: Mapped[list["Book"]] = relationship(back_populates="author", cascade="all, delete", lazy="selectin")
