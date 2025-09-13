@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime, timezone
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -6,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.user.schemas import UserCreate, SuperUserCreate
-from src.core.models import User, Profile, EmailVerificationToken, PasswordResetToken
+from src.core.models import User, Profile, EmailVerificationToken, PasswordResetToken, Review
 from src.utils import hash_password, verify_password
 from src.utils.auth_helpers import generate_email_verification_code, generate_password_reset_token
 from src.tasks.tasks import send_verification_email, send_password_reset_token_email
@@ -133,6 +134,17 @@ async def change_password(old_password: str,
     user.password = hash_password(password=new_password)
     await session.commit()
     return {"Your password has been changed."}
+
+
+async def get_reviews_by_user_id(user: User,
+                                 user_id: int,
+                                 session: AsyncSession) -> Sequence[Review] | None | HTTPException:
+    if not user.role_access == "Super user":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to view this page.")
+    statement = select(Review).where(Review.user_id == user_id)
+    reviews = await session.execute(statement)
+    reviews = reviews.scalars().all()
+    return reviews
 
 
 
