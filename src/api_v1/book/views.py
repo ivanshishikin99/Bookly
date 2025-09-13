@@ -16,7 +16,7 @@ router = APIRouter(prefix="/book", tags=["Books"])
 
 @cache(expire=60)
 @router.get("/{book_id}", response_model=BookRead, status_code=status.HTTP_404_NOT_FOUND)
-async def get_book_by_id_view(book: Book = Depends(get_book_by_id_dependency)) -> Book | HTTPException:
+async def get_book_by_id_view(book: Book = Depends(get_book_by_id_dependency)) -> BookRead | HTTPException:
     return book
 
 
@@ -63,6 +63,6 @@ async def delete_book_view(user: User = Depends(get_user_by_token),
 @cache(expire=60)
 @router.get("/{author_id}/books", status_code=status.HTTP_200_OK, response_model=list[BookRead])
 async def get_books_by_author_view(author: Author = Depends(get_author_by_id_dependency),
-                                   session: AsyncSession = Depends(db_helper.session_getter)) -> list[Book]:
+                                   session: AsyncSession = Depends(db_helper.session_getter)) -> list[BookRead]:
     return await get_books_by_author(author=author,
                                      session=session)
