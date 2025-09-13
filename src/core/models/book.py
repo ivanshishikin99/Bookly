@@ -8,6 +8,7 @@ from src.core.models.mixins import IdMixin, CreatedAtMixin, UpdatedAtMixin
 
 if TYPE_CHECKING:
     from src.core.models.author import Author
+    from src.core.models.review import Review
 
 
 class Book(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
@@ -16,3 +17,4 @@ class Book(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
     description: Mapped[str] = mapped_column(nullable=False)
     author: Mapped["Author"] = relationship(back_populates="books", lazy="selectin")
     author_id: Mapped[int] = mapped_column(ForeignKey("author.id"), index=True)
+    reviews: Mapped["Review"] = relationship(back_populates="book", cascade="all, delete", lazy="selectin")
