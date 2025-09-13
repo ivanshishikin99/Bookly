@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import APIRouter, status, Depends, HTTPException, Response
@@ -6,11 +7,13 @@ from fastapi_cache.decorator import cache
 from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api_v1.review.schemas import ReviewRead
 from src.api_v1.user.crud import create_user, login_user, delete_user, create_super_user, send_verification_email, \
-    send_verification_email_crud, verify_email_crud, send_reset_password_crud, reset_password_crud, change_password
+    send_verification_email_crud, verify_email_crud, send_reset_password_crud, reset_password_crud, change_password, \
+    get_reviews_by_user_id
 from src.api_v1.user.dependencies import get_user_by_id_dependency
 from src.api_v1.user.schemas import UserRead, UserCreate, SuperUserRead, SuperUserCreate
-from src.core.models import User, EmailVerificationToken
+from src.core.models import User, EmailVerificationToken, Review
 from src.tasks import send_welcome_email
 from src.utils import db_helper
 from src.utils.auth_helpers import get_user_by_token, TokenModel, create_access_token, create_refresh_token, \
@@ -19,6 +22,15 @@ from src.utils.auth_helpers import get_user_by_token, TokenModel, create_access_
 router = APIRouter(prefix="/users", tags=["Users"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api_v1/users/login")
+
+
+@router.get("/{user_id}/reviews", response_model=list[ReviewRead], status_code=status.HTTP_200_OK)
+async def get_reviews_by_user_id_view(user_id: int,
+                                      user: User = Depends(get_user_by_token),
+                                      session: AsyncSession = Depends(db_helper.session_getter)) -> Sequence[Review] | None | HTTPException:
+    return await get_reviews_by_user_id(user=user,
+                                        user_id=user_id,
+                                        session=session)
 
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
@@ -101,3 +113,4 @@ async def delete_user_view(response: Response,
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
     return await delete_user(user=user, session=session)
+
