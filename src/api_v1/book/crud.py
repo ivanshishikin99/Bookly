@@ -1,9 +1,11 @@
+from typing import Sequence
+
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api_v1.book.schemas import BookCreate, BookUpdatePartial, BookUpdateFull, BookRead
-from src.core.models import Book, User, Author
+from src.core.models import Book, User, Author, Review
 
 
 async def get_book_by_id(book_id: int,
@@ -70,3 +72,12 @@ async def get_books_by_author(author: Author,
                                    author=book.author.full_name,
                                    description=book.description))
     return books_read
+
+
+async def get_book_reviews(book: Book,
+                           session: AsyncSession) -> Sequence[Review] | None:
+    statement = select(Review).where(Review.book_id == book.id)
+    reviews = await session.execute(statement)
+    reviews = reviews.scalars().all()
+    return reviews
+
