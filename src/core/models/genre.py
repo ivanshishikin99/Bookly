@@ -11,5 +11,5 @@ if TYPE_CHECKING:
 
 
 class Genre(Base, IdMixin, CreatedAtMixin, UpdatedAtMixin):
-    name: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(nullable=False, unique=True)
     books: Mapped[list["Book"]] = relationship(secondary="BookGenreAssociationTable", back_populates="genres", lazy="selectin")
